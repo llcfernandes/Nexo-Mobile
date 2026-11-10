@@ -43,9 +43,13 @@ export const auth: Auth
 export const db: Firestore
 export const buscarProdutoPorCodigo: (codigo: string) => Promise<Produto | null>
 // coleção "produtos", campo "codigo_barras"; null se não encontrar
+export const buscarProdutoPorId: (id: string) => Promise<Produto | null>
+export const listarProdutos: () => Promise<Produto[]>
+// coleção "produtos", ordenada por nome no cliente
 
 // services/auth.ts
 export const login: (email: string, password: string) => Promise<UserCredential>
+export const cadastrar: (email: string, password: string) => Promise<UserCredential>
 export const logout: () => Promise<void>
 export const observarSessao: (callback: (user: User | null) => void) => Unsubscribe
 
@@ -78,23 +82,34 @@ export const useCarrinho: () => CarrinhoContextValue
 
 | Rota            | Arquivo               | Params                                                        |
 |-----------------|-----------------------|---------------------------------------------------------------|
-| `/`             | `app/index.tsx`       | nenhum (redireciona: sessão ativa → `/caixa`, senão `/login`) |
+| `/`             | `app/index.tsx`       | nenhum (abre a mesma tela de `/login`)                        |
 | `/login`        | `app/login.tsx`       | nenhum                                                        |
+| `/boas-vindas`  | `app/boas-vindas.tsx` | nenhum (logo, bem-vindo e equipe; depois do login)            |
+| `/inicio`       | `app/inicio.tsx`      | nenhum                                                        |
+| `/produtos`     | `app/produtos.tsx`    | nenhum                                                        |
+| `/produto/[id]` | `app/produto/[id].tsx`| `id` do produto                                               |
+| `/perfil`       | `app/perfil.tsx`      | nenhum                                                        |
 | `/caixa`        | `app/caixa.tsx`       | nenhum                                                        |
 | `/carrinho`     | `app/carrinho.tsx`    | nenhum                                                        |
+| `/favoritos`    | `app/favoritos.tsx`   | nenhum (lista com foto, no mesmo formato do carrinho)         |
 | `/confirmacao`  | `app/confirmacao.tsx` | `totalBRL`, `cotacaoUSD`, `cotacaoEUR` (todos string)         |
 
 Params de rota chegam como string. Na Confirmação, converter com `Number(...)`. Os itens **não** vão por rota: vêm de `useCarrinho()` (decisão D-02).
 
 Navegação:
 
-- Login → Caixa: `router.replace('/caixa')`
+- Login ou cadastro → Boas-vindas: `router.replace('/boas-vindas')`
+- Boas-vindas → Início: `router.replace('/inicio')`
 - Logout → Login: `router.replace('/login')`
+- Início → Caixa: `router.push('/caixa')`
+- Início → Produtos: `router.push('/produtos')`
+- Início → Perfil: `router.push('/perfil')`
+- Caixa → Início: `router.push('/inicio')`
 - Caixa → Carrinho: `router.push('/carrinho')`
 - Carrinho "Continuar Escaneando": `router.back()`
 - Carrinho → Confirmação: `router.push({ pathname: '/confirmacao', params: { totalBRL, cotacaoUSD, cotacaoEUR } })`
 - Confirmação "Voltar": `router.back()`
-- Confirmação após salvar: `router.replace('/caixa')`
+- Confirmação após salvar: `router.replace('/inicio')`
 
 ## Firestore
 
@@ -111,7 +126,7 @@ Modelo completo no vault (`NEXO Mobile - 03 - Modelo de Dados Firebase`). Resumo
 
 | Arquivo                       | O que é                                                       |
 |-------------------------------|---------------------------------------------------------------|
-| `services/firebase.ts`         | Init do Firebase, `auth`, `db`, `buscarProdutoPorCodigo`      |
+| `services/firebase.ts`         | Init do Firebase, `auth`, `db`, `buscarProdutoPorCodigo`, `listarProdutos` |
 | `services/auth.ts`             | login, logout, observarSessao                                 |
 | `services/exchange.ts`         | buscarCotacoes, converter                                     |
 | `services/vendas.ts`           | salvarVenda                                                   |

@@ -1,4 +1,5 @@
 import {
+  createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
@@ -10,6 +11,9 @@ import { auth } from './firebase'
 
 export const login = (email: string, password: string): Promise<UserCredential> =>
   signInWithEmailAndPassword(auth, email, password)
+
+export const cadastrar = (email: string, password: string): Promise<UserCredential> =>
+  createUserWithEmailAndPassword(auth, email, password)
 
 export const logout = (): Promise<void> => signOut(auth)
 

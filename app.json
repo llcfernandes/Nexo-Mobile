@@ -34,6 +34,12 @@
         {
           "cameraPermission": "O NEXO usa a câmera para escanear o código de barras dos produtos."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O NEXO usa uma foto da galeria para o perfil do operador."
+        }
       ]
     ]
   }

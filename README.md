@@ -1,18 +1,80 @@
 # NEXO Mobile
 
-App PDV mobile para comércio turístico: o operador escaneia o produto e o app mostra o preço em BRL, USD e EUR em tempo real, e registra a venda no Firebase. Projeto de extensão da disciplina PDM (ARA4711), Estácio 2026.2.
+Loja mobile para comércio no Rio. O cliente escolhe o produto, vê o total em real, dólar e euro e simula o pagamento. O operador cadastra a vitrine, escaneia no caixa e acompanha as vendas. Projeto da disciplina PDM (ARA4711), Estácio 2026.2.
 
-**Novo no projeto?** Comece pelo [`ONBOARDING.md`](./ONBOARDING.md) — tem o passo a passo completo para rodar o app no seu celular.
+Equipe na tela de bem-vindo, depois do login: Lucas, Douglas, Freitas, Diego e Gabriel.
+
+Para instalar e apresentar, siga o [`ONBOARDING.md`](./ONBOARDING.md).
 
 ---
 
-## Status
+## Rodar no computador
 
-**MVP completo e validado** (03/10/2026): as 4 telas (Login, Caixa, Carrinho, Confirmação) implementadas, revisadas e testadas em dispositivo real, com fluxo completo de ponta a ponta — login, scanner de produto, conversão de moeda ao vivo, e gravação da venda no Firestore.
+É o caminho da apresentação em sala. O app abre no navegador.
 
-Próxima fase: polimento visual (logo, cores, tipografia) e, depois, build de distribuição via EAS.
+1. Node.js LTS e o arquivo `.env` na raiz do projeto (o mesmo pasta do `package.json`). O `.env` não vai para o Git. Peça o arquivo no grupo.
+2. Na pasta do projeto:
 
-Acompanhamento detalhado em [`tasks/STATUS.md`](./tasks/STATUS.md).
+```bash
+npm install
+```
+
+Se o npm reclamar de dependência do React, rode `npm install --legacy-peer-deps`.
+
+3. Suba o site:
+
+```bash
+npm run web
+```
+
+4. Abra **http://localhost:8081**.
+
+Ao abrir, a primeira tela é sempre o login. O bem-vindo vem depois de entrar ou criar a conta.
+
+Conferir tipos, no Windows:
+
+```powershell
+.\node_modules\.bin\tsc --noEmit
+```
+
+## Rodar no celular
+
+O scanner de código de barras é teste de celular. No Chrome a câmera abre, mas não lê EAN com confiança.
+
+1. Instale o Expo Go do SDK 54, não o da Play Store: https://expo.dev/go?sdkVersion=54&platform=android&device=true
+2. Celular e PC na mesma rede Wi-Fi.
+3. `npx expo start` e escaneie o QR code com o Expo Go.
+4. Se as redes forem diferentes: `npx expo start --tunnel`.
+
+iPhone não instala essa versão antiga do Expo Go. A apresentação no Android ou no navegador do computador.
+
+Detalhes e a tabela de erros estão no [`ONBOARDING.md`](./ONBOARDING.md).
+
+---
+
+## Como apresentar
+
+Feche o app ou a aba antes de começar. A primeira tela tem de ser o login.
+
+1. **Conta.** Entre com o e-mail de teste ou crie uma conta na hora. E-mail de teste: `douglas@nexo.com`. A senha fica no grupo. A sessão continua aberta até sair no perfil.
+2. **Bem-vindo.** Fundo em degradê, a logo **NEXO.**, **Bem-vindo** e os cinco nomes da equipe. **Continuar** segue. As curiosidades ficam na tela de início.
+3. **Cliente.** O app abre comprando. Mostre a busca, um produto, o coração de favorito e o **+** no carrinho. No carrinho, **−** e **+** mudam a quantidade. O total aparece em real, dólar e euro.
+4. **Pagamento.** Aba **Pagar**. Escolha PIX, cartão, vale refeição, vale alimentação ou dinheiro e conclua. Diga em voz alta que nenhum banco é acionado: é uma simulação para a banca ver o fluxo. Com itens no carrinho, a compra fica registrada. Sem itens, dá para simular um valor.
+5. **Operador.** Abra os três traços e toque em **Entrar como operador**. Isso é de propósito, para a apresentação: a troca fica neste aparelho e não pede outra conta. Mostre **Novo produto**, a edição, **Escanear** e a aba **Vendas**.
+6. **Perfil.** Foto da galeria, **Remover foto**, contagem de compras ou vendas e a lista de favoritos. O tema claro ou escuro também está nos três traços.
+
+Volte para cliente pelos mesmos três traços antes de encerrar, se a próxima pessoa for mostrar a compra.
+
+### O que falar se perguntarem
+
+- A cotação vem de open.er-api.com, com cache de uma hora. A tela nunca chama a internet direto.
+- Produto repetido soma quantidade. Não cria outra linha.
+- Foto de perfil, favoritos e o modo operador ficam neste aparelho. A venda e o catálogo que o Firebase aceitar ficam na nuvem.
+- Se o Firestore recusar gravar um produto, ele continua aparecendo neste aparelho para a demo não parar.
+
+### O que não prometer
+
+Não há cobrança real, estoque, frete calculado nem entrega rastreada. A frase do Rio é o recado da loja no início. O pagamento é ilustrativo.
 
 ---
 
@@ -20,107 +82,31 @@ Acompanhamento detalhado em [`tasks/STATUS.md`](./tasks/STATUS.md).
 
 | O quê | Tecnologia |
 |---|---|
-| Framework | React Native + Expo SDK 54 (TypeScript) |
-| Navegação | Expo Router (file-based routing) |
-| Autenticação | Firebase Auth (e-mail + senha) |
-| Banco de dados | Firebase Firestore |
-| Cotação de câmbio | [open.er-api.com](https://www.exchangerate-api.com/docs/free) (ExchangeRate-API, endpoint aberto, sem chave) |
-| Câmera / Scanner | `expo-camera` (`CameraView`, leitura nativa de código de barras) |
-| Estado global | React Context API |
+| App | React Native + Expo SDK 54 (TypeScript) |
+| Navegação | Expo Router |
+| Conta | Firebase Auth (e-mail e senha, com criar conta) |
+| Dados | Firebase Firestore |
+| Cotação | open.er-api.com, só em `services/exchange.ts` |
+| Câmera | `expo-camera` |
+| Ícones | `lucide-react-native` |
+| Estado | React Context (carrinho, tema, favoritos, papel, painel) |
 
-## Rodar
-
-```bash
-npm install
-cp .env.example .env     # preencher com os dados do projeto Firebase (peça no grupo)
-npx expo start
-```
-
-Veja o [`ONBOARDING.md`](./ONBOARDING.md) para o passo a passo completo, incluindo a versão certa do Expo Go (SDK 54).
-
----
-
-## O app em 4 telas
+## Telas
 
 ```
-LOGIN → CAIXA (scanner) → CARRINHO (cotação ao vivo) → CONFIRMAÇÃO (grava a venda)
+ABERTURA → LOGIN → INÍCIO
+Cliente: Produtos, Carrinho, Pagar, Perfil
+Operador: Produtos, Escanear, Vendas, Perfil
 ```
 
-1. **Login** — e-mail/senha via Firebase Auth. Sessão persiste entre aberturas do app.
-2. **Caixa** — câmera em tela cheia, lê código de barras (EAN-13/EAN-8/UPC-A/UPC-E/Code128), busca o produto no Firestore e adiciona ao carrinho.
-3. **Carrinho** — lista os itens escaneados, busca a cotação de câmbio (com cache de 1h) e mostra o total em BRL, USD e EUR.
-4. **Confirmação** — resumo da venda, grava no Firestore com snapshot da cotação usada, limpa o carrinho e volta para a Caixa.
+A confirmação antiga (`/confirmacao`) não é o fluxo da apresentação. A compra termina em **Pagar**.
 
-## Estrutura de pastas
+## Firebase
 
-```
-app/            telas (index, _layout, login, caixa, carrinho, confirmacao)
-components/     ProdutoCard, CotacaoTag
-services/       firebase, auth, exchange, vendas — toda chamada externa passa por aqui
-context/        CarrinhoContext — estado global do carrinho
-types/          tipos compartilhados (Produto, ItemCarrinho, Venda, Cotacoes)
-specs/          especificações de cada tela, contratos e decisões técnicas (fonte da verdade)
-tasks/          status do projeto e checklist de cada card
-.claude/        configuração do Claude Code (hooks, agente de revisão, comandos)
-```
+`produtos`: `nome`, `preco_brl`, `codigo_barras`, `categoria` e, quando couber, `foto`.
 
-## Firebase — estrutura dos dados
+`vendas`: `operador_id`, `created_at`, `total_brl`, `cotacao_usd`, `cotacao_eur`, `itens`, e no fluxo novo `forma_pagamento` (`pix`, `cartao`, `vale_refeicao`, `vale_alimentacao`, `dinheiro`) e `origem` (`compra` ou `caixa`).
 
-### Coleção `produtos`
-```
-produtos/{id}
-  nome: string
-  preco_brl: number
-  codigo_barras: string
-  categoria: string
-```
-Cadastro é manual, direto no Console do Firebase (o app só lê, nunca escreve em `produtos`).
+Quem está logado lê os produtos. A venda é criada por quem está na sessão. O modo operador da demo não é um campo no Firebase.
 
-### Coleção `vendas`
-```
-vendas/{id}
-  operador_id: string       (uid do Firebase Auth)
-  created_at: timestamp     (gerado pelo servidor)
-  total_brl: number
-  cotacao_usd: number       (snapshot da cotação usada na venda)
-  cotacao_eur: number       (snapshot da cotação usada na venda)
-  itens: [{ produto_id, nome, preco_brl, quantidade }]
-```
-Cada operador só lê as próprias vendas (ver Firestore Rules). Uma vez criada, a venda não pode ser editada nem apagada.
-
-### Regras de segurança (Firestore Rules)
-Só usuário autenticado lê `produtos`; ninguém escreve via app. Vendas só são criadas pelo próprio operador (`operador_id` tem que bater com quem está logado); cada um só lê as suas; sem update/delete.
-
-## Decisões técnicas importantes
-
-Histórico completo em [`specs/decisoes.md`](./specs/decisoes.md). As mais relevantes para quem for mexer no código:
-
-- **Cotação de câmbio:** já trocamos de provedor uma vez (de AwesomeAPI para open.er-api.com) porque a primeira API ficava fora do ar por sobrecarga global, mesmo com pouco uso nosso. Tem cache de 1h para evitar repetir chamada à toa.
-- **Itens da venda** vêm do Context, não são passados pela rota de navegação (rota só leva total e cotações).
-- **Scanner** usa só `expo-camera`, sem biblioteca extra.
-- **Produto repetido** no scanner incrementa quantidade, não duplica linha.
-
-## Como continuar desenvolvendo
-
-O projeto segue um fluxo de **spec primeiro, código depois** (SDD — Spec-Driven Development), com o Claude Code como ferramenta de implementação:
-
-1. Toda tela/funcionalidade tem uma spec em `specs/` com contexto, critérios de aceite e o que **não** fazer (non-goals). Leia a spec antes de mexer.
-2. Trabalhe em um branch próprio: `git checkout -b tela/nome-da-mudanca`.
-3. Abra o Claude Code na pasta do projeto — ele carrega `CLAUDE.md` e as specs automaticamente.
-4. Depois de implementar: rode `npx tsc --noEmit` para checar tipos.
-5. Antes do PR: peça uma revisão (o projeto tem um comando/agente de revisão configurado, veja `.claude/commands/` e `.claude/agents/`) que confere contra os critérios da spec.
-6. Abra o Pull Request para `main`.
-
-**Arquivos protegidos:** `services/`, `context/`, `types/`, `app/index.tsx`, `app/_layout.tsx` e a pasta `specs/` têm um "dono" (Douglas) e mudanças neles devem ser conversadas antes — eles são a base que todas as telas usam, então uma mudança ali afeta todo mundo.
-
-Regras completas em [`CLAUDE.md`](./CLAUDE.md) e [`specs/00-constituicao.md`](./specs/00-constituicao.md).
-
-## Problemas já resolvidos (não repita o mesmo caminho)
-
-- **Expo Go incompatível:** o projeto está fixo em SDK 54; o Expo Go da loja vem em versão mais nova. Instale pela versão certa — ver `ONBOARDING.md`.
-- **Rate limit de API de câmbio:** se "Cotação indisponível" aparecer com frequência, não é bug — é limite temporário da API gratuita. Já tem cache implementado; evite testar o mesmo endpoint manualmente em rajada (navegador + app contam para o mesmo limite).
-- **Safe area (Android):** conteúdo no rodapé das telas respeita a barra de navegação do sistema (`SafeAreaView`/`useSafeAreaInsets`). Se adicionar algo no rodapé de uma tela nova, siga o mesmo padrão.
-
-## Equipe
-
-Douglas, Diego, Felipe, Gabriel, Lucas — PDM 2026.2.
+Decisões antigas e as deste clone estão em [`specs/decisoes.md`](./specs/decisoes.md).

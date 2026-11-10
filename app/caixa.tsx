@@ -1,11 +1,15 @@
 import { CameraView, useCameraPermissions, type BarcodeScanningResult } from 'expo-camera'
 import { router } from 'expo-router'
+import { ArrowLeft, Menu, ShoppingCart } from 'lucide-react-native'
 import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { logout } from '../services/auth'
-import { buscarProdutoPorCodigo } from '../services/firebase'
+import BarraInferior from '../components/BarraInferior'
+import TextoVerde from '../components/TextoVerde'
 import { useCarrinho } from '../context/CarrinhoContext'
+import { usePainel } from '../context/PainelContext'
+import { useTema } from '../context/TemaContext'
+import { buscarProdutoPorCodigo } from '../services/firebase'
 
 const TIPOS_DE_CODIGO = ['ean13', 'ean8', 'upc_a', 'upc_e', 'code128'] as const
 const TEMPO_DE_LIBERACAO_MS = 1500
@@ -20,11 +24,12 @@ export default function Caixa() {
   const [permission, requestPermission] = useCameraPermissions()
   const [travado, setTravado] = useState(false)
   const [feedback, setFeedback] = useState<Feedback | null>(null)
-  const [saindo, setSaindo] = useState(false)
   const travadoRef = useRef(false)
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const { quantidadeTotal, adicionarItem } = useCarrinho()
+  const { cores } = useTema()
+  const { abrir } = usePainel()
 
   useEffect(() => {
     return () => {
@@ -58,19 +63,6 @@ export default function Caixa() {
     }
   }
 
-  const handleLogout = async () => {
-    setSaindo(true)
-    try {
-      await logout()
-      router.replace('/login')
-    } catch (e) {
-      console.error('Erro ao sair:', e)
-      setFeedback({ tipo: 'erro', mensagem: 'Não foi possível sair. Tente novamente.' })
-    } finally {
-      setSaindo(false)
-    }
-  }
-
   if (!permission) {
     return (
       <View style={styles.centro}>
@@ -81,41 +73,59 @@ export default function Caixa() {
 
   if (!permission.granted) {
     return (
-      <View style={styles.centro}>
-        <Text style={styles.permissaoTexto}>Precisamos da sua permissão para usar a câmera e escanear os produtos.</Text>
-        <Pressable style={styles.botaoPermissao} onPress={requestPermission}>
-          <Text style={styles.botaoPermissaoTexto}>Permitir acesso à câmera</Text>
+      <View style={[styles.centro, { backgroundColor: cores.fundo }]}>
+        <Text style={[styles.permissaoTexto, { color: cores.texto }]}>
+          Precisamos da sua permissão para usar a câmera e escanear os produtos.
+        </Text>
+        <Pressable style={[styles.botaoPermissao, { backgroundColor: cores.destaque }]} onPress={requestPermission}>
+          <Text style={[styles.botaoPermissaoTexto, { color: cores.destaqueTexto }]}>Permitir acesso à câmera</Text>
+        </Pressable>
+        <Pressable onPress={() => router.push('/inicio')}>
+          <TextoVerde style={styles.linkInicio}>Voltar ao início</TextoVerde>
         </Pressable>
       </View>
     )
   }
 
   return (
-    <View style={styles.container}>
-      <CameraView
-        style={StyleSheet.absoluteFill}
-        facing="back"
-        barcodeScannerSettings={{ barcodeTypes: [...TIPOS_DE_CODIGO] }}
-        onBarcodeScanned={travado ? undefined : handleBarcodeScanned}
-      />
-
+    <View style={[styles.container, { backgroundColor: cores.fundo, paddingTop: insets.top + 8 }]}>
       <View style={styles.topo}>
-        <Pressable style={styles.botaoLogout} onPress={handleLogout} disabled={saindo}>
-          {saindo ? <ActivityIndicator color="#fff" /> : <Text style={styles.botaoLogoutTexto}>Sair</Text>}
+        <Pressable style={[styles.botaoMenu, { backgroundColor: cores.superficie, borderColor: cores.linha }]} onPress={() => router.back()} accessibilityLabel="Voltar">
+          <ArrowLeft color={cores.texto} size={20} />
+        </Pressable>
+        <Text style={[styles.titulo, { color: cores.texto }]}>Escanear</Text>
+        <Pressable style={[styles.botaoMenu, { backgroundColor: cores.superficie, borderColor: cores.linha }]} onPress={abrir} accessibilityLabel="Abrir configurações">
+          <Menu color={cores.texto} size={20} />
         </Pressable>
       </View>
 
-      {feedback ? (
-        <View style={[styles.feedback, feedback.tipo === 'erro' && styles.feedbackErro]}>
-          <Text style={styles.feedbackTexto}>{feedback.mensagem}</Text>
-        </View>
-      ) : null}
-
-      <View style={[styles.rodape, { bottom: 32 + insets.bottom }]}>
-        <Pressable style={styles.botaoCarrinho} onPress={() => router.push('/carrinho')}>
-          <Text style={styles.botaoCarrinhoTexto}>Ver Carrinho ({quantidadeTotal})</Text>
-        </Pressable>
+      <View style={[styles.janela, { backgroundColor: '#000' }]}>
+        <CameraView
+          style={styles.camera}
+          facing="back"
+          barcodeScannerSettings={{ barcodeTypes: [...TIPOS_DE_CODIGO] }}
+          onBarcodeScanned={travado ? undefined : handleBarcodeScanned}
+        />
+        {feedback ? (
+          <View style={[styles.feedback, feedback.tipo === 'erro' && styles.feedbackErro]}>
+            <Text style={styles.feedbackTexto}>{feedback.mensagem}</Text>
+          </View>
+        ) : null}
       </View>
+
+      <Text style={[styles.dica, { color: cores.textoSuave }]}>Encaixe o código na janela.</Text>
+
+      {quantidadeTotal > 0 ? (
+        <Pressable style={[styles.botaoCarrinho, { backgroundColor: cores.destaque }]} onPress={() => router.push('/carrinho')}>
+          <ShoppingCart color={cores.destaqueTexto} size={20} />
+          <Text style={[styles.botaoCarrinhoTexto, { color: cores.destaqueTexto }]}>
+            Ver carrinho ({quantidadeTotal})
+          </Text>
+        </Pressable>
+      ) : (
+        <Text style={[styles.dica, { color: cores.textoSuave }]}>O carrinho aparece aqui depois do primeiro produto.</Text>
+      )}
+      <BarraInferior />
     </View>
   )
 }
@@ -123,7 +133,31 @@ export default function Caixa() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    paddingHorizontal: 16,
+    gap: 14,
+  },
+  topo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  titulo: {
+    flex: 1,
+    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  janela: {
+    height: 320,
+    borderRadius: 28,
+    overflow: 'hidden',
+  },
+  camera: {
+    flex: 1,
+  },
+  dica: {
+    textAlign: 'center',
+    fontSize: 14,
   },
   centro: {
     flex: 1,
@@ -137,38 +171,32 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   botaoPermissao: {
-    backgroundColor: '#1f6feb',
-    borderRadius: 8,
+    borderRadius: 14,
     paddingVertical: 14,
     paddingHorizontal: 24,
   },
   botaoPermissaoTexto: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  topo: {
-    position: 'absolute',
-    top: 48,
-    right: 16,
-  },
-  botaoLogout: {
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    borderRadius: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 16,
-  },
-  botaoLogoutTexto: {
-    color: '#fff',
+  linkInicio: {
     fontWeight: 'bold',
+  },
+  botaoMenu: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   feedback: {
     position: 'absolute',
-    top: 100,
-    left: 16,
-    right: 16,
-    backgroundColor: 'rgba(39,174,96,0.9)',
-    borderRadius: 8,
+    left: 12,
+    right: 12,
+    bottom: 12,
+    backgroundColor: 'rgba(39,174,96,0.92)',
+    borderRadius: 12,
     paddingVertical: 12,
     alignItems: 'center',
   },
@@ -179,20 +207,15 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  rodape: {
-    position: 'absolute',
-    bottom: 32,
-    left: 16,
-    right: 16,
-  },
   botaoCarrinho: {
-    backgroundColor: '#1f6feb',
-    borderRadius: 8,
+    borderRadius: 16,
     paddingVertical: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
   },
   botaoCarrinhoTexto: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },

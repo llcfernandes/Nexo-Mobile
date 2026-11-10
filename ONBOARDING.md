@@ -1,17 +1,17 @@
 # Onboarding — NEXO Mobile
 
-Guia para quem está entrando no projeto agora. Em 10 minutos você tem o app rodando no seu celular.
+Como instalar, abrir e apresentar o app. A apresentação da faculdade cabe no navegador do computador. O celular entra quando forem mostrar o scanner.
 
 ---
 
 ## 1. Pré-requisitos
 
-- **Node.js** instalado (LTS mais recente) — [nodejs.org](https://nodejs.org)
-- **Git** instalado
-- **Celular Android** (iPhone não funciona para desenvolvimento local — ver nota no fim)
-- **VS Code** (ou outro editor) com terminal
+- Node.js LTS — [nodejs.org](https://nodejs.org)
+- Git
+- O arquivo `.env` do grupo (não está no GitHub)
+- Para o celular: Android e o Expo Go do SDK 54
 
-## 2. Clonar e instalar
+## 2. Instalar
 
 ```bash
 git clone https://github.com/oliveiiradg/Nexo-Mobile.git
@@ -19,66 +19,66 @@ cd Nexo-Mobile
 npm install
 ```
 
-## 3. Colocar o `.env`
+Se aparecer erro de dependência do React (`ERESOLVE`), rode de novo com `npm install --legacy-peer-deps`.
 
-O `.env` **não vem no repositório** de propósito (tem as chaves de configuração do Firebase, e não deve ficar público). Você recebeu esse arquivo separadamente (grupo do WhatsApp).
+Coloque o `.env` na raiz, ao lado do `package.json`. Não commite esse arquivo.
 
-Coloca o arquivo `.env` **direto na raiz do projeto** — mesma pasta onde está o `package.json`. Não precisa editar nada nele, já vem preenchido.
-
-Confirma que deu certo: deve existir `Nexo-Mobile/.env` (visível no VS Code; se não aparecer, ative "mostrar arquivos ocultos" — alguns editores escondem arquivos que começam com ponto).
-
-## 4. Instalar o Expo Go — versão certa (SDK 54)
-
-**Importante:** o Expo Go da Play Store normalmente já está em uma versão mais nova que a nossa (SDK 57+). Se você instalar o da loja direto, vai dar erro `Project is incompatible with this version of Expo Go`.
-
-1. Se já tiver o Expo Go instalado, desinstala.
-2. Instala pela versão certa: **https://expo.dev/go?sdkVersion=54&platform=android&device=true**
-
-## 5. Rodar o projeto
+## 3. Apresentar no computador
 
 ```bash
-npx expo start
+npm run web
 ```
 
-Vai aparecer um QR code no terminal. Abre o Expo Go (o da versão certa) no celular e escaneia.
+Abra **http://localhost:8081**.
 
-**Celular e PC precisam estar na mesma rede Wi-Fi.** Se não estiverem (ex.: testando de redes diferentes), usa:
+Antes de chamar a banca, feche a aba inteira e abra o endereço de novo. A primeira tela é sempre o login, mesmo que a conta já tenha entrado antes.
 
-```bash
-npx expo start --tunnel
-```
+Depois de **Entrar** ou **Criar conta**, vem o bem-vindo: logo **NEXO.** e os nomes Lucas, Douglas, Freitas, Diego e Gabriel. **Continuar** abre a loja. As curiosidades aparecem só no início.
 
-## 6. Login de teste
+E-mail de teste: `douglas@nexo.com`. A senha está no grupo. Também dá para tocar em **Criar conta**. A senha precisa ter pelo menos 6 caracteres.
 
-- **E-mail:** `douglas@nexo.com`
-- **Senha:** peça no grupo
+### Roteiro curto
 
-Ou, se você já tem seu próprio usuário operador criado no Firebase, usa o seu.
+1. Login ou criar conta.
+2. Bem-vindo: logo e nomes da equipe. **Continuar**.
+3. Como cliente: produto, favorito, carrinho e total em real, dólar e euro.
+4. **Pagar**: PIX, cartão, vale refeição, vale alimentação ou dinheiro. Diga que é simulação.
+5. Três traços → **Entrar como operador**. Cadastre ou edite um produto, abra **Vendas**.
+6. Perfil: foto, remover foto, favoritos e sair.
+7. Três traços de novo se quiser voltar ao cliente. O tema claro e o escuro estão no mesmo menu.
 
-## 7. Acesso ao Firebase e GitHub
+O papel de operador fica neste navegador de propósito, para a troca caber na apresentação sem outra conta.
 
-Você já deve ter recebido convite por e-mail para:
-- **Firebase** (console.firebase.google.com) — projeto `nexo-mobile-unesa`
-- **GitHub** (github.com/oliveiiradg/Nexo-Mobile) — aceita o convite de colaborador para poder dar push
+## 4. Celular
 
-Se não recebeu nenhum dos dois, avisa no grupo.
+O código de barras se mostra no Android.
 
----
+1. Desinstale o Expo Go da loja, se ele for mais novo que o SDK 54.
+2. Instale este: https://expo.dev/go?sdkVersion=54&platform=android&device=true
+3. PC e celular na mesma Wi-Fi.
+4. `npx expo start` e leia o QR code no Expo Go.
+5. Redes diferentes: `npx expo start --tunnel`.
+
+No celular, fechar o app de verdade é tirar ele da lista de recentes. Aí o login aparece de novo. Só bloquear a tela não conta.
+
+iPhone não instala essa versão do Expo Go. Use o navegador do computador ou um Android.
+
+## 5. Durante a fala
+
+- Cotação: serviço `services/exchange.ts`, cache de uma hora. Se aparecer "Cotação indisponível", a compra ainda pode ser simulada.
+- Favoritos, foto de perfil e modo operador sobrevivem ao recarregar neste aparelho. Uma venda concluída com itens vai para o Firestore quando a regra deixa.
+- Não diga que o PIX ou o cartão cobram de verdade.
 
 ## Problemas comuns
 
-| Sintoma | Causa | Solução |
-|---|---|---|
-| `Project is incompatible with this version of Expo Go` | Expo Go na versão errada | Reinstala pelo link do passo 4 |
-| Tela fica em branco / trava no loading | Bundle desatualizado no celular | Fecha o app no celular (desliza pra fora dos recentes) e escaneia o QR de novo |
-| `Erro ao buscar cotações` / "Cotação indisponível" | API de câmbio fora do ar ou limite de uso temporário | Normal acontecer às vezes; espera alguns minutos. Se persistir, avisa no grupo — já trocamos de provedor uma vez por causa disso (ver `specs/decisoes.md`, D-01) |
-| `npm install` falha | Versão de Node muito antiga | Atualiza o Node para a LTS mais recente |
-| Câmera não abre / pede permissão toda hora | Permissão negada no Android | Vai em Configurações do celular → Apps → Expo Go → Permissões → Câmera → Permitir |
+| Sintoma | O que fazer |
+|---|---|
+| `Project is incompatible with this version of Expo Go` | Reinstalar o Expo Go pelo link do passo 4 |
+| Tela branca no celular | Fechar o Expo Go na lista de recentes e ler o QR de novo |
+| `npm install` quebra no React | `npm install --legacy-peer-deps` |
+| Cotação indisponível | Esperar e seguir. A API gratuita limita rajada de pedidos |
+| Câmera negada | Configurações do Android → Expo Go → Câmera → Permitir |
+| O login não é a primeira tela | Fechar a aba ou o app por completo e abrir o endereço de novo |
+| `npx tsc` instala um pacote errado | No Windows, usar `.\node_modules\.bin\tsc --noEmit` |
 
-## Sobre iPhone
-
-O Expo Go para iOS só instala a versão mais recente (SDK mais novo), e não dá pra forçar uma versão antiga como no Android. Então **não dá pra testar localmente em iPhone** com esse fluxo. Alternativa: pedir para alguém com Android testar, ou gerar um build de desenvolvimento via EAS (fala com o Douglas sobre isso).
-
----
-
-*Dúvidas? Fala no grupo. Documentação técnica completa em [`README.md`](./README.md) e nas specs em [`specs/`](./specs/).*
+Dúvida de sala: grupo do WhatsApp. O mapa técnico do app está no [`README.md`](./README.md).

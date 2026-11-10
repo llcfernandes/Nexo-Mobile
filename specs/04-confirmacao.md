@@ -14,7 +14,7 @@ Tela final da venda. Recebe total e cotações por parâmetro, pega os itens do 
 - Params (`useLocalSearchParams`) chegam como string: converter com `Number(...)`.
 - `operador_id` = `auth.currentUser?.uid`. Se vier nulo, `router.replace('/login')`.
 - O objeto enviado a `salvarVenda` segue o tipo `Venda` de `types/index.ts`. `created_at` é do servidor (`salvarVenda` cuida).
-- Sucesso: `limparCarrinho()`, feedback "Venda registrada!" e `router.replace('/caixa')` (D-04).
+- Sucesso: `limparCarrinho()`, feedback "Venda registrada!" e `router.replace('/inicio')` (D-04, destino atualizado em D-11).
 - Falha: mostra erro legível e **mantém tudo na tela** para tentar de novo. Não limpa o carrinho.
 - Botão fica desabilitado durante o salvamento (evita venda duplicada).
 
@@ -24,7 +24,7 @@ Tela final da venda. Recebe total e cotações por parâmetro, pega os itens do 
 - **F-02** Resumo: lista de itens, total em BRL, USD e EUR
 - **F-03** "Confirmar e Salvar" grava em `vendas` com `operador_id`, `created_at` (servidor), `total_brl`, `cotacao_usd` (snapshot), `cotacao_eur` (snapshot) e `itens` (nome, preço, quantidade)
 - **F-04** Loading enquanto salva
-- **F-05** Sucesso → `limparCarrinho()`, "Venda registrada!" e navega para `/caixa`
+- **F-05** Sucesso → `limparCarrinho()`, "Venda registrada!" e navega para `/inicio`
 - **F-06** Falha ao salvar → erro exibido, dados mantidos na tela
 - **F-07** "Voltar" cancela sem salvar e volta ao Carrinho
 

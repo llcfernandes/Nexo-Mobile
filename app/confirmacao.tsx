@@ -1,14 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router'
-import { useEffect, useState } from 'react'
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { useEffect } from 'react'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+import BarraApp from '../components/BarraApp'
+import TextoVerde from '../components/TextoVerde'
 import CotacaoTag from '../components/CotacaoTag'
 import { useCarrinho } from '../context/CarrinhoContext'
+import { useTema } from '../context/TemaContext'
 import { auth } from '../services/firebase'
-import { salvarVenda } from '../services/vendas'
-import type { Venda } from '../types'
-
-const TEMPO_DE_FEEDBACK_MS = 1200
 
 export default function Confirmacao() {
   const { totalBRL, cotacaoUSD, cotacaoEUR } = useLocalSearchParams<{
@@ -16,15 +14,12 @@ export default function Confirmacao() {
     cotacaoUSD: string
     cotacaoEUR: string
   }>()
-  const { itens, limparCarrinho } = useCarrinho()
+  const { cores } = useTema()
+  const { itens } = useCarrinho()
 
   const total = Number(totalBRL)
   const usd = Number(cotacaoUSD)
   const eur = Number(cotacaoEUR)
-
-  const [salvando, setSalvando] = useState(false)
-  const [sucesso, setSucesso] = useState(false)
-  const [erro, setErro] = useState<string | null>(null)
 
   useEffect(() => {
     if (!auth.currentUser?.uid) {
@@ -36,91 +31,54 @@ export default function Confirmacao() {
     router.back()
   }
 
-  const handleConfirmar = async () => {
-    const operadorId = auth.currentUser?.uid
-    if (!operadorId) {
-      router.replace('/login')
-      return
-    }
-
-    setErro(null)
-    setSalvando(true)
-    try {
-      const venda: Venda = {
-        operador_id: operadorId,
-        total_brl: total,
-        cotacao_usd: usd,
-        cotacao_eur: eur,
-        itens,
-      }
-      await salvarVenda(venda)
-      setSucesso(true)
-      setTimeout(() => {
-        limparCarrinho()
-        router.replace('/caixa')
-      }, TEMPO_DE_FEEDBACK_MS)
-    } catch (e) {
-      console.error('Erro ao salvar venda:', e)
-      setErro('Não foi possível registrar a venda. Tente novamente.')
-      setSalvando(false)
-    }
+  const handleConfirmar = () => {
+    router.push('/pagamento')
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <Text style={styles.titulo}>Confirmação</Text>
-
+    <View style={[styles.tela, { backgroundColor: cores.fundo }]}>
+      <BarraApp titulo="Compra" voltar />
+      <View style={styles.container}>
       <View style={styles.lista}>
         {itens.map((item) => (
           <View key={item.produto_id} style={styles.linha}>
-            <Text style={styles.linhaNome}>
+            <Text style={[styles.linhaNome, { color: cores.texto }]}>
               {item.quantidade}x {item.nome}
             </Text>
-            <Text style={styles.linhaPreco}>R$ {(item.preco_brl * item.quantidade).toFixed(2)}</Text>
+            <Text style={[styles.linhaPreco, { color: cores.texto }]}>R$ {(item.preco_brl * item.quantidade).toFixed(2)}</Text>
           </View>
         ))}
       </View>
 
-      <View style={styles.totais}>
+      <View style={[styles.totais, { borderTopColor: cores.linha }]}>
         <CotacaoTag moeda="BRL" valor={`R$ ${total.toFixed(2)}`} />
         <CotacaoTag moeda="USD" valor={`US$ ${(total / usd).toFixed(2)}`} />
         <CotacaoTag moeda="EUR" valor={`€ ${(total / eur).toFixed(2)}`} />
       </View>
 
-      {sucesso ? <Text style={styles.sucesso}>Venda registrada!</Text> : null}
-      {erro ? <Text style={styles.erro}>{erro}</Text> : null}
-
-      <Pressable style={styles.botaoSecundario} onPress={handleVoltar} disabled={salvando}>
-        <Text style={styles.botaoSecundarioTexto}>Voltar</Text>
+      <View style={styles.acoes}>
+      <Pressable style={[styles.botaoSecundario, { borderColor: cores.destaque }]} onPress={handleVoltar}>
+        <TextoVerde style={styles.botaoSecundarioTexto}>Voltar</TextoVerde>
       </Pressable>
 
-      <Pressable
-        style={[styles.botaoPrimario, salvando && styles.botaoDesabilitado]}
-        onPress={handleConfirmar}
-        disabled={salvando}
-      >
-        {salvando ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <Text style={styles.botaoPrimarioTexto}>Confirmar e Salvar</Text>
-        )}
+      <Pressable style={[styles.botaoPrimario, { backgroundColor: cores.destaque }]} onPress={handleConfirmar}>
+        <Text style={[styles.botaoPrimarioTexto, { color: cores.destaqueTexto }]}>Ir para o pagamento</Text>
       </Pressable>
-    </SafeAreaView>
+      </View>
+      </View>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
+  tela: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    paddingTop: 56,
     paddingHorizontal: 16,
+    paddingTop: 16,
     gap: 12,
-  },
-  titulo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 8,
   },
   lista: {
     gap: 8,
@@ -141,40 +99,35 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     gap: 8,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
     paddingTop: 12,
   },
   sucesso: {
-    color: '#27ae60',
     textAlign: 'center',
     fontWeight: 'bold',
   },
   erro: {
-    color: '#c0392b',
     textAlign: 'center',
+  },
+  acoes: {
+    marginTop: 'auto',
+    gap: 12,
+    paddingBottom: 16,
   },
   botaoSecundario: {
     borderWidth: 1,
-    borderColor: '#1f6feb',
-    borderRadius: 8,
+    borderRadius: 14,
     paddingVertical: 12,
     alignItems: 'center',
   },
   botaoSecundarioTexto: {
-    color: '#1f6feb',
     fontWeight: 'bold',
   },
   botaoPrimario: {
-    backgroundColor: '#1f6feb',
-    borderRadius: 8,
+    borderRadius: 14,
     paddingVertical: 14,
     alignItems: 'center',
   },
-  botaoDesabilitado: {
-    backgroundColor: '#9db8dd',
-  },
   botaoPrimarioTexto: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },

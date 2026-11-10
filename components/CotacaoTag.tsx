@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native'
+import { useTema } from '../context/TemaContext'
 
 type Props = {
   moeda: string
@@ -6,10 +7,12 @@ type Props = {
 }
 
 export default function CotacaoTag({ moeda, valor }: Props) {
+  const { cores } = useTema()
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.moeda}>{moeda}</Text>
-      <Text style={styles.valor}>{valor}</Text>
+    <View style={[styles.container, { backgroundColor: cores.superficieAlt }]}>
+      <Text style={[styles.moeda, { color: cores.textoSuave }]}>{moeda}</Text>
+      <Text style={[styles.valor, { color: cores.texto }]}>{valor}</Text>
     </View>
   )
 }
@@ -19,13 +22,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    backgroundColor: '#f0f4f8',
-    borderRadius: 8,
+    borderRadius: 12,
     minWidth: 80,
   },
   moeda: {
     fontSize: 12,
-    color: '#555',
     fontWeight: 'bold',
   },
   valor: {

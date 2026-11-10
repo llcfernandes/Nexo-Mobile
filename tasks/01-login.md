@@ -10,6 +10,12 @@ Spec: `specs/01-login.md`. Marque cada item ao concluir.
 - [x] L-06 Sucesso → `router.replace('/caixa')`
 - [x] L-07 Sessão ativa → direto para `/caixa`
 - [x] L-08 "Entrar" desabilitado com campo vazio
+- [x] L-09 "Criar conta" abre o modo de cadastro com confirmação de senha
+- [x] L-10 Cadastro chama `cadastrar(email, password)`
+- [ ] L-11 Loading e botão desabilitado durante o cadastro (o botão já desabilita no código; o spinner ainda não foi visto num envio real)
+- [x] L-12 Senha curta ou diferente não chama o Firebase
+- [ ] L-13 Sucesso → `/caixa` já autenticado (falta um e-mail novo de verdade)
+- [ ] L-14 Erro de cadastro em português vindo do Firebase (a tela já mapeia o código; falta ver a resposta real)
 
 Fechamento:
 

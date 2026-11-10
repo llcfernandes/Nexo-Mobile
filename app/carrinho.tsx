@@ -1,15 +1,22 @@
 import { router } from 'expo-router'
+import { ShoppingCart } from 'lucide-react-native'
 import { useEffect, useRef, useState } from 'react'
 import { ActivityIndicator, FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import CotacaoTag from '../components/CotacaoTag'
+import BarraApp from '../components/BarraApp'
+import BarraInferior from '../components/BarraInferior'
 import ProdutoCard from '../components/ProdutoCard'
+import TextoVerde from '../components/TextoVerde'
 import { useCarrinho } from '../context/CarrinhoContext'
+import { usePapel } from '../context/PapelContext'
+import { useTema } from '../context/TemaContext'
 import { buscarCotacoes, converter } from '../services/exchange'
 import type { Cotacoes } from '../types'
 
 export default function Carrinho() {
-  const { itens, totalBRL, removerItem } = useCarrinho()
+  const { cores } = useTema()
+  const { papel } = usePapel()
+  const { itens, totalBRL, aumentarQuantidade, diminuirQuantidade } = useCarrinho()
+  const cliente = papel === 'cliente'
 
   const [cotacoes, setCotacoes] = useState<Cotacoes | null>(null)
   const [carregandoCotacoes, setCarregandoCotacoes] = useState(true)
@@ -40,82 +47,89 @@ export default function Carrinho() {
     buscar()
   }, [])
 
-  const podeConfirmar = itens.length > 0 && cotacoes !== null
-
-  const handleConfirmar = () => {
-    if (!cotacoes) return
-    router.push({
-      pathname: '/confirmacao',
-      params: {
-        totalBRL: String(totalBRL),
-        cotacaoUSD: String(cotacoes.usd),
-        cotacaoEUR: String(cotacoes.eur),
-      },
-    })
-  }
+  const podePagar = itens.length > 0
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <Text style={styles.titulo}>Carrinho</Text>
+    <View style={[styles.container, { backgroundColor: cores.fundo }]}>
+      <BarraApp titulo="Carrinho" />
 
       {itens.length === 0 ? (
         <View style={styles.vazio}>
-          <Text style={styles.vazioTexto}>Nenhum produto escaneado ainda</Text>
+          <Text style={[styles.vazioTexto, { color: cores.textoSuave }]}>
+            {cliente ? 'Seu carrinho está vazio' : 'Nenhum produto no caixa'}
+          </Text>
         </View>
       ) : (
         <FlatList
           style={styles.lista}
+          contentContainerStyle={styles.listaConteudo}
           data={itens}
           keyExtractor={(item) => item.produto_id}
-          renderItem={({ item }) => <ProdutoCard item={item} onRemover={removerItem} />}
+          renderItem={({ item }) => (
+            <ProdutoCard item={item} onMais={aumentarQuantidade} onMenos={diminuirQuantidade} />
+          )}
         />
       )}
 
-      <View style={styles.rodape}>
+      <View style={[styles.rodape, { borderTopColor: cores.linha, backgroundColor: cores.superficie }]}>
         {carregandoCotacoes ? (
-          <ActivityIndicator />
+          <ActivityIndicator color={cores.destaque} />
         ) : cotacaoIndisponivel ? (
-          <Text style={styles.avisoErro}>Cotação indisponível</Text>
+          <Text style={[styles.avisoErro, { color: cores.perigo }]}>Cotação indisponível</Text>
         ) : (
           <>
             {cotacaoDesatualizada ? <Text style={styles.avisoDiscreto}>Cotação desatualizada</Text> : null}
-            <View style={styles.totais}>
-              <CotacaoTag moeda="BRL" valor={`R$ ${totalBRL.toFixed(2)}`} />
-              <CotacaoTag moeda="USD" valor={cotacoes ? `US$ ${converter(totalBRL, cotacoes.usd)}` : '—'} />
-              <CotacaoTag moeda="EUR" valor={cotacoes ? `€ ${converter(totalBRL, cotacoes.eur)}` : '—'} />
+            <View style={styles.linhaTotal}>
+              <Text style={[styles.rotulo, { color: cores.textoSuave }]}>Subtotal</Text>
+              <Text style={[styles.valor, { color: cores.texto }]}>R$ {totalBRL.toFixed(2)}</Text>
+            </View>
+            <View style={styles.linhaTotal}>
+              <Text style={[styles.rotulo, { color: cores.textoSuave }]}>Dólar</Text>
+              <Text style={[styles.valor, { color: cores.texto }]}>{cotacoes ? `US$ ${converter(totalBRL, cotacoes.usd)}` : '—'}</Text>
+            </View>
+            <View style={styles.linhaTotal}>
+              <Text style={[styles.rotulo, { color: cores.textoSuave }]}>Euro</Text>
+              <Text style={[styles.valor, { color: cores.texto }]}>{cotacoes ? `€ ${converter(totalBRL, cotacoes.eur)}` : '—'}</Text>
+            </View>
+            <View style={[styles.linhaTotal, styles.totalFinal, { borderTopColor: cores.linha }]}>
+              <Text style={[styles.totalRotulo, { color: cores.texto }]}>Total</Text>
+              <TextoVerde style={styles.totalValor}>R$ {totalBRL.toFixed(2)}</TextoVerde>
             </View>
           </>
         )}
 
-        <Pressable style={styles.botaoSecundario} onPress={() => router.back()}>
-          <Text style={styles.botaoSecundarioTexto}>Continuar Escaneando</Text>
+        <Pressable onPress={() => router.push(cliente ? '/produtos' : '/caixa')}>
+          <Text style={[styles.link, { color: cores.textoSuave }]}>
+            {cliente ? 'Continuar comprando' : 'Voltar ao caixa'}
+          </Text>
         </Pressable>
 
         <Pressable
-          style={[styles.botaoPrimario, !podeConfirmar && styles.botaoDesabilitado]}
-          onPress={handleConfirmar}
-          disabled={!podeConfirmar}
+          style={[styles.botaoPrimario, { backgroundColor: podePagar ? cores.destaque : cores.destaqueSuave }]}
+          onPress={() => router.push('/pagamento')}
+          disabled={!podePagar}
         >
-          <Text style={styles.botaoPrimarioTexto}>Confirmar Venda</Text>
+          <ShoppingCart color={podePagar ? cores.destaqueTexto : cores.textoSuave} size={18} />
+          <Text style={[styles.botaoPrimarioTexto, { color: podePagar ? cores.destaqueTexto : cores.textoSuave }]}>
+            {cliente ? 'Comprar agora' : 'Receber pagamento'}
+          </Text>
         </Pressable>
       </View>
-    </SafeAreaView>
+      <BarraInferior />
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 56,
-  },
-  titulo: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    marginBottom: 16,
   },
   lista: {
     flex: 1,
+  },
+  listaConteudo: {
+    padding: 16,
+    gap: 12,
   },
   vazio: {
     flex: 1,
@@ -125,22 +139,45 @@ const styles = StyleSheet.create({
   },
   vazioTexto: {
     fontSize: 16,
-    color: '#555',
     textAlign: 'center',
   },
   rodape: {
     padding: 16,
+    paddingBottom: 108,
     borderTopWidth: 1,
-    borderTopColor: '#eee',
     gap: 12,
   },
-  totais: {
+  linhaTotal: {
     flexDirection: 'row',
+    alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 8,
+    gap: 12,
+  },
+  rotulo: {
+    fontSize: 14,
+  },
+  valor: {
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  totalFinal: {
+    borderTopWidth: 1,
+    paddingTop: 10,
+    marginTop: 2,
+  },
+  totalRotulo: {
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  totalValor: {
+    fontSize: 22,
+    fontWeight: '800',
+  },
+  link: {
+    textAlign: 'center',
+    fontWeight: '700',
   },
   avisoErro: {
-    color: '#c0392b',
     textAlign: 'center',
     fontWeight: 'bold',
   },
@@ -149,28 +186,15 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 12,
   },
-  botaoSecundario: {
-    borderWidth: 1,
-    borderColor: '#1f6feb',
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  botaoSecundarioTexto: {
-    color: '#1f6feb',
-    fontWeight: 'bold',
-  },
   botaoPrimario: {
-    backgroundColor: '#1f6feb',
-    borderRadius: 8,
-    paddingVertical: 14,
+    borderRadius: 18,
+    minHeight: 54,
+    flexDirection: 'row',
     alignItems: 'center',
-  },
-  botaoDesabilitado: {
-    backgroundColor: '#9db8dd',
+    justifyContent: 'center',
+    gap: 8,
   },
   botaoPrimarioTexto: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
