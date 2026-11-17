@@ -123,7 +123,7 @@ export default function EditorProduto() {
           <ActivityIndicator size="large" color={cores.destaque} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={styles.conteudo}>
+        <ScrollView contentContainerStyle={styles.conteudo} showsVerticalScrollIndicator={false}>
           <FotoProduto produto={{ nome: nome || 'Produto', categoria, foto }} style={styles.capa} icone={42} />
           <Pressable style={[styles.secundario, { borderColor: cores.destaque }]} onPress={escolherFoto}>
             <TextoVerde style={styles.secundarioTexto}>Escolher foto</TextoVerde>

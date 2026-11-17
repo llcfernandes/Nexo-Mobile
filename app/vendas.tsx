@@ -63,6 +63,7 @@ export default function Vendas() {
       ) : (
         <FlatList
           contentContainerStyle={styles.lista}
+          showsVerticalScrollIndicator={false}
           data={vendas}
           keyExtractor={(item) => item.id}
           ListEmptyComponent={<Text style={[styles.aviso, { color: cores.textoSuave }]}>Nenhuma venda registrada ainda.</Text>}

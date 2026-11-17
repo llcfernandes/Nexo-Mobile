@@ -52,6 +52,7 @@ export default function Favoritos() {
       ) : (
         <FlatList
           style={styles.lista}
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listaConteudo}
           data={favoritos}
           keyExtractor={(item) => item.id}

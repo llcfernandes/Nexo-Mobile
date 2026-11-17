@@ -62,6 +62,7 @@ export default function Carrinho() {
       ) : (
         <FlatList
           style={styles.lista}
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listaConteudo}
           data={itens}
           keyExtractor={(item) => item.produto_id}

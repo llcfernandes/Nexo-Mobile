@@ -131,7 +131,7 @@ export default function Perfil() {
   return (
     <View style={[styles.container, { backgroundColor: cores.fundo }]}>
       <BarraApp titulo="Perfil" voltar={false} />
-      <ScrollView contentContainerStyle={styles.conteudo}>
+      <ScrollView contentContainerStyle={styles.conteudo} showsVerticalScrollIndicator={false}>
         <Pressable onPress={escolherFoto} accessibilityLabel="Escolher foto de perfil">
           <View style={[styles.avatar, { backgroundColor: cores.destaque }]}>
             {foto ? <Image source={{ uri: foto }} style={styles.foto} /> : <Text style={[styles.letra, { color: cores.destaqueTexto }]}>{letra}</Text>}

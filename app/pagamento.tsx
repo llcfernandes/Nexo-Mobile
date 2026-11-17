@@ -208,7 +208,7 @@ export default function Pagamento() {
   return (
     <View style={[styles.container, { backgroundColor: cores.fundo }]}>
       <BarraApp titulo={cliente ? 'Pagamento' : 'Receber'} voltar={false} />
-      <ScrollView contentContainerStyle={styles.conteudo}>
+      <ScrollView contentContainerStyle={styles.conteudo} showsVerticalScrollIndicator={false}>
         {pago ? (
           <NotificacaoOk
             total={dinheiro(total)}

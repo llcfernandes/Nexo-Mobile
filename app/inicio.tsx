@@ -82,7 +82,10 @@ export default function Inicio() {
   return (
     <View style={styles.container}>
       <FundoDegrade />
-      <ScrollView contentContainerStyle={[styles.conteudo, { paddingTop: insets.top + 16, paddingBottom: 120 }]}>
+      <ScrollView
+        contentContainerStyle={[styles.conteudo, { paddingTop: insets.top + 16, paddingBottom: 120 }]}
+        showsVerticalScrollIndicator={false}
+      >
         <View style={styles.topo}>
           <Pressable
             style={[styles.menu, { backgroundColor: cores.superficie, borderColor: cores.linha }]}

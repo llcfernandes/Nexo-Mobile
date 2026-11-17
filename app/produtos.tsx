@@ -162,6 +162,7 @@ export default function Produtos() {
       ) : (
         <FlatList
           data={visiveis}
+          showsVerticalScrollIndicator={false}
           keyExtractor={(item) => item.id}
           numColumns={2}
           ListHeaderComponent={cabecalho}
